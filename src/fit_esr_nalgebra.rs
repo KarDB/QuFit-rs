@@ -37,64 +37,59 @@ impl LeastSquaresProblem<f64, Dyn, Dyn> for LorenzianFit {
     }
 
     fn jacobian(&self) -> Option<DMatrix<f64>> {
-        let dl_da = self.gradient_da();
-        let dl_dgamma = self.gradient_dgamma();
-        let dl_dx0 = self.gradient_dx0();
-        let jacobian = DMatrix::from_columns(&[dl_da, dl_dgamma, dl_dx0]);
+        let dl_da = &self
+            .x_data
+            .zip_map(&self.y_data, |x, y| self.gradient_da(x, y));
+        let dl_dgamma = &self
+            .x_data
+            .zip_map(&self.y_data, |x, y| self.gradient_dgamma(x, y));
+        let dl_dx0 = &self
+            .x_data
+            .zip_map(&self.y_data, |x, y| self.gradient_dx0(x, y));
+        let jacobian =
+            DMatrix::from_columns(&[dl_da.to_owned(), dl_dgamma.to_owned(), dl_dx0.to_owned()]);
+        //dbg!(&jacobian.shape());
         Some(jacobian)
     }
 }
 
 impl LorenzianFit {
-    fn gradient_da(&self) -> DVector<f64> {
+    fn gradient_da(&self, x: f64, y: f64) -> f64 {
         let params = self.params();
         let _a = params[0];
         let gamma = params[1];
         let x0 = params[2];
         let pi = std::f64::consts::PI;
-        let denom = (&self.x_data.map(|x| x - x0))
-            .map(|x| x.powi(2))
-            .map(|x| x + gamma.powi(2));
-        let lor = 2.0 * (&self.y_data - &self.x_data.map(|x| lorentzian(x, &params)));
-        let denom_lor = &lor.zip_map(&denom, |l, d| l / d);
-        let df_da = denom_lor.map(|dl| 1.0 / pi * gamma * dl);
+        let denom = (x - x0).powi(2) + gamma.powi(2);
+        let lor = 2.0 * (y - lorentzian(x, &params));
+
+        let df_da = 1.0 / pi * gamma / denom * lor;
         df_da
     }
 
-    fn gradient_dgamma(&self) -> DVector<f64> {
+    fn gradient_dgamma(&self, x: f64, y: f64) -> f64 {
         let params = self.params();
         let a = params[0];
         let gamma = params[1];
         let x0 = params[2];
         let pi = std::f64::consts::PI;
-        let denom = (&self.x_data.map(|x| x - x0))
-            .map(|x| x.powi(2))
-            .map(|x| x + gamma.powi(2));
-        let lor = 2.0 * (&self.y_data - &self.x_data.map(|x| lorentzian(x, &params)));
+        let denom = (x - x0).powi(2) + gamma.powi(2);
+        let lor = 2.0 * (y - lorentzian(x, &params));
 
-        let denomsquare = denom.map(|x| x.powi(2));
-        let denomsquare_lor = &lor.zip_map(&denomsquare, |l, d| l / d);
-        let derivative_numerator = (&self.x_data.map(|x| x - x0))
-            .map(|x| x.powi(2))
-            .map(|x| x - gamma.powi(2));
-        let df_dgamma = denomsquare_lor.zip_map(&derivative_numerator, |dl, num| a / pi * num * dl);
+        let df_dgamma = a / pi * ((x - x0).powi(2) - gamma.powi(2)) / denom.powi(2) * lor;
         df_dgamma
     }
 
-    fn gradient_dx0(&self) -> DVector<f64> {
+    fn gradient_dx0(&self, x: f64, y: f64) -> f64 {
         let params = self.params();
         let a = params[0];
         let gamma = params[1];
         let x0 = params[2];
         let pi = std::f64::consts::PI;
-        let denom = (&self.x_data.map(|x| x - x0))
-            .map(|x| x.powi(2))
-            .map(|x| x + gamma.powi(2));
-        let lor = 2.0 * (&self.y_data - &self.x_data.map(|x| lorentzian(x, &params)));
-        let denom_square = denom.map(|x| x.powi(2));
-        let denomsquare_lor = lor.zip_map(&denom_square, |l, d| l / d);
-        let x_diff = &self.x_data.map(|x| x - x0);
-        let df_dx0 = denomsquare_lor.zip_map(&x_diff, |dsl, x| -2.0 * a * gamma / pi * dsl * x);
+        let denom = (x - x0).powi(2) + gamma.powi(2);
+        let lor = 2.0 * (y - lorentzian(x, &params));
+
+        let df_dx0 = -2.0 * a / pi * ((x - x0) * gamma) / denom.powi(2) * lor;
         df_dx0
     }
 }
