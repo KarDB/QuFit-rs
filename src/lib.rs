@@ -1,42 +1,43 @@
-use levenberg_marquardt::{differentiate_numerically, LeastSquaresProblem, LevenbergMarquardt};
-use nalgebra::DVector;
-use ndarray::{s, Array, Array3};
+use ndarray::{s, Array, Array3, Array4, Array5, Dimension, IxDyn};
 use ndarray_npy::read_npy;
 use numpy::{IntoPyArray, PyArray3};
 use pyo3::prelude::*;
 mod fit_esr_nalgebra;
-use fit_esr_nalgebra::LorenzianFit;
+mod fit_rabi_nalgebra;
+//mod fit_t1_nalgebra;
 
 #[pymodule]
 fn rust_lorentz(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fit, m)?)?;
+    m.add_function(wrap_pyfunction!(fit_rabi, m)?)?;
     Ok(())
 }
 
 #[pyfunction]
 fn fit(py: Python, path: String) -> PyResult<PyObject> {
     let data: Array3<f64> = read_npy(path).unwrap();
-    let x = Array::linspace(0.0, 1.0, 150);
-    let data = DVector::from_vec(data.slice(s![1, 1, ..]).to_vec());
-    let x = DVector::from_vec(x.to_vec());
-
-    let mut problem = LorenzianFit {
-        x_data: x,
-        y_data: data,
-        p: DVector::from_vec(vec![0.2, 0.2, 0.6]),
-    };
-    let jac = problem.jacobian().unwrap();
-    println!("analytic jacobian {:?}", jac);
-    let jac_num = differentiate_numerically(&mut problem).unwrap();
-    println!("numerical jacobian {:?}", jac_num);
-    // let res = fit_esr::fit_image(data, y);
-    let (result, report) = LevenbergMarquardt::new().minimize(problem);
-    println!("{:?}", result.p);
-    dbg!(report.termination.was_successful());
-    dbg!(report.objective_function.abs());
-    dbg!(report.termination);
-    dbg!(report.number_of_evaluations);
-    let res: Array3<f64> = Array::zeros((3, 3, 3));
+    let (_, _, zdim) = data.dim();
+    let x_axis = Array::linspace(0.0, 1.0, zdim);
+    let res = fit_esr_nalgebra::fit_image(x_axis, data);
     let pyarray: &PyArray3<f64> = res.into_pyarray(py);
     Ok(pyarray.to_object(py))
 }
+
+#[pyfunction]
+fn fit_rabi(py: Python, path: String) -> PyResult<PyObject> {
+    let data: Array3<f64> = read_npy(path).unwrap();
+    let (_, _, zdim) = data.dim();
+    let x_axis = Array::linspace(0.0, 1.0, zdim);
+    let res = fit_rabi_nalgebra::fit_image(x_axis, data);
+    let pyarray: &PyArray3<f64> = res.into_pyarray(py);
+    Ok(pyarray.to_object(py))
+}
+
+// Define dimension to be dynamic.
+fn load_data(path: String) -> Array<f32, IxDyn> {
+    let data: Array<u32, IxDyn> = read_npy(path).unwrap();
+    let data = data.mapv(|x| x as f32);
+    data
+}
+
+fn reference_ratio<D: Dimension>(data: Array<f32, D>) -> () {}

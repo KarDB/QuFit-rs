@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 argmin = "0.8.1"
 argmin-math = {version="0.3.0", features=["ndarray_latest-serde"]}
+argmm = "0.1.2"
 levenberg-marquardt = "0.13.1"
 nalgebra = "0.32.3"
 ndarray = {version = "0.15.6", features=["serde"]}
