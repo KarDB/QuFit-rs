@@ -1,7 +1,7 @@
 mod fit_esr_nalgebra;
 mod load;
 use load::DataContainer;
-use load::{load_data, reference_ratio, reference_sum};
+use ndarray::s;
 
 fn main() {
     // let data: Array3<f64> = read_npy("lorenzians.npy").unwrap();
@@ -21,11 +21,20 @@ fn main() {
     // let ref_data_sum = reference_sum(data);
     // dbg!(ref_data_sum.unwrap());
     //
-    let mut data = DataContainer::new("dataloading.npy".into());
-    dbg!(&data);
-    data.reference_ratio();
-    dbg!(&data);
-    let mut data = DataContainer::new("dataloading.npy".into());
-    data.reference_sum();
-    dbg!(&data);
+    // let mut data = DataContainer::new("dataloading.npy".into());
+    // // dbg!(&data);
+    // data.reference_ratio();
+    // dbg!(&data);
+    let mut data = DataContainer::new("data_grid.npy".into());
+    // dbg!(data.data.shape());
+    // dbg!(data.data.ndim());
+    let compressed = data.compress_data(8);
+    dbg!(compressed.slice(s![0, 0, 0, .., ..]));
+    // let mut data = DataContainer::new("dataloading_longd.npy".into());
+    // let _ = data.blockwise_mean(3);
+    // let mut data = DataContainer::new("dataloading_1d.npy".into());
+    // let _ = data.blockwise_mean(3);
+    // data.reference_sum();
+    // let dims = data.get_new_shape(2);
+    // dbg!(dims);
 }
