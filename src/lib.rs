@@ -1,4 +1,4 @@
-use ndarray::{s, Array, Array3, Array4, Array5, Dimension, IxDyn};
+use ndarray::{Array, Array3};
 use ndarray_npy::read_npy;
 use numpy::{IntoPyArray, PyArray3};
 use pyo3::prelude::*;
@@ -32,12 +32,3 @@ fn fit_rabi(py: Python, path: String) -> PyResult<PyObject> {
     let pyarray: &PyArray3<f64> = res.into_pyarray(py);
     Ok(pyarray.to_object(py))
 }
-
-// Define dimension to be dynamic.
-fn load_data(path: String) -> Array<f32, IxDyn> {
-    let data: Array<u32, IxDyn> = read_npy(path).unwrap();
-    let data = data.mapv(|x| x as f32);
-    data
-}
-
-fn reference_ratio<D: Dimension>(data: Array<f32, D>) -> () {}

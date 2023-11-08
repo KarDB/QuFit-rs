@@ -2,13 +2,6 @@ use ndarray::{s, Array, ArrayD, Axis, Dimension, IxDyn, Slice};
 use ndarray_npy::read_npy;
 use std::cmp::min;
 
-// define dimension to be dynamic.
-pub fn load_data(path: String) -> Array<f32, IxDyn> {
-    let data: Array<u32, IxDyn> = read_npy(path).unwrap();
-    let data = data.mapv(|x| x as f32);
-    data
-}
-
 #[derive(Debug)]
 pub struct DataContainer {
     pub data: Array<f32, IxDyn>,
@@ -16,9 +9,15 @@ pub struct DataContainer {
 
 impl DataContainer {
     pub fn new(path: String) -> Self {
-        DataContainer {
-            data: load_data(path),
+        Self {
+            data: Self::load_data(path),
         }
+    }
+
+    pub fn load_data(path: String) -> Array<f32, IxDyn> {
+        let data: Array<u32, IxDyn> = read_npy(path).unwrap();
+        let data = data.mapv(|x| x as f32);
+        data
     }
 
     pub fn reference_ratio(&mut self) -> Result<(), &'static str> {
@@ -99,8 +98,8 @@ impl DataContainer {
         result
     }
 
-    pub fn compress_data(&self, stepsize: usize) -> ArrayD<f32> {
-        match self.data.ndim() {
+    pub fn compress_data(&mut self, stepsize: usize) {
+        self.data = match self.data.ndim() {
             4 => {
                 if self.data.shape().last().unwrap() == &1 {
                     self.data.clone()
