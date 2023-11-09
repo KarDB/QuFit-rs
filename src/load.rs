@@ -1,28 +1,29 @@
 use ndarray::{s, Array, ArrayD, Axis, Dimension, IxDyn, Slice};
 use ndarray_npy::read_npy;
+use pyo3::exceptions::PyValueError;
+use pyo3::prelude::*;
 use std::cmp::min;
 
 #[derive(Debug)]
+#[pyclass]
 pub struct DataContainer {
     pub data: Array<f32, IxDyn>,
 }
 
+#[pymethods]
 impl DataContainer {
+    #[new]
     pub fn new(path: String) -> Self {
         Self {
             data: Self::load_data(path),
         }
     }
 
-    pub fn load_data(path: String) -> Array<f32, IxDyn> {
-        let data: Array<u32, IxDyn> = read_npy(path).unwrap();
-        let data = data.mapv(|x| x as f32);
-        data
-    }
-
-    pub fn reference_ratio(&mut self) -> Result<(), &'static str> {
+    pub fn reference_ratio(&mut self) -> PyResult<()> {
         if self.data.len_of(Axis(0)) != 2 {
-            return Err("The first axis should have a size of 2 for division");
+            return Err(PyValueError::new_err(
+                "The first axis should have a size of 2 for division",
+            ));
         }
         let a0 = self.data.slice_axis(Axis(0), Slice::new(0, Some(1), 1));
         let a1 = self.data.slice_axis(Axis(0), Slice::new(1, Some(2), 1));
@@ -30,9 +31,11 @@ impl DataContainer {
         Ok(())
     }
 
-    pub fn reference_sum(&mut self) -> Result<(), &'static str> {
+    pub fn reference_sum(&mut self) -> PyResult<()> {
         if self.data.len_of(Axis(0)) != 2 {
-            return Err("The first axis should have a size of 2 for division");
+            return Err(PyValueError::new_err(
+                "The first axis should have a size of 2 for division",
+            ));
         }
         let a0 = self.data.slice_axis(Axis(0), Slice::new(0, Some(1), 1));
         let a1 = self.data.slice_axis(Axis(0), Slice::new(1, Some(2), 1));
@@ -40,7 +43,31 @@ impl DataContainer {
         Ok(())
     }
 
-    pub fn get_new_shape(&self, stepsize: usize) -> Vec<usize> {
+    pub fn compress_data(&mut self, stepsize: usize) {
+        self.data = match self.data.ndim() {
+            4 => {
+                if self.data.shape().last().unwrap() == &1 {
+                    self.data.clone()
+                } else {
+                    self.blockwise_mean_1d(stepsize)
+                }
+            }
+            5 => self.blockwise_mean_2d(stepsize),
+            _ => {
+                panic!("The array has an unsupported number of dimensions. There is no method defined for this case. {:?}", self.data.shape())
+            }
+        }
+    }
+}
+
+impl DataContainer {
+    fn load_data(path: String) -> Array<f32, IxDyn> {
+        let data: Array<u32, IxDyn> = read_npy(path).unwrap();
+        let data = data.mapv(|x| x as f32);
+        data
+    }
+
+    fn get_new_shape(&self, stepsize: usize) -> Vec<usize> {
         let shape = self.data.shape().to_vec();
         let compressed_shape: Vec<_> = shape
             .iter()
@@ -56,7 +83,7 @@ impl DataContainer {
         new_shape
     }
 
-    pub fn blockwise_mean_2d(&self, stepsize: usize) -> ArrayD<f32> {
+    fn blockwise_mean_2d(&self, stepsize: usize) -> ArrayD<f32> {
         let shape = self.data.shape();
         let max_index_3 = shape[3];
         let max_index_4 = shape[4];
@@ -78,7 +105,7 @@ impl DataContainer {
         result
     }
 
-    pub fn blockwise_mean_1d(&self, stepsize: usize) -> ArrayD<f32> {
+    fn blockwise_mean_1d(&self, stepsize: usize) -> ArrayD<f32> {
         let shape = self.data.shape();
         let max_index_3 = shape[3];
         let new_shape = self.get_new_shape(stepsize);
@@ -96,21 +123,5 @@ impl DataContainer {
             result[idx] = update_value.mean().unwrap();
         }
         result
-    }
-
-    pub fn compress_data(&mut self, stepsize: usize) {
-        self.data = match self.data.ndim() {
-            4 => {
-                if self.data.shape().last().unwrap() == &1 {
-                    self.data.clone()
-                } else {
-                    self.blockwise_mean_1d(stepsize)
-                }
-            }
-            5 => self.blockwise_mean_2d(stepsize),
-            _ => {
-                panic!("The array has an unsupported number of dimensions. There is no method defined for this case. {:?}", self.data.shape())
-            }
-        }
     }
 }

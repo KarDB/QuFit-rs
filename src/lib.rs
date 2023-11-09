@@ -1,15 +1,18 @@
+use load::DataContainer;
 use ndarray::{Array, Array3};
 use ndarray_npy::read_npy;
 use numpy::{IntoPyArray, PyArray3};
 use pyo3::prelude::*;
 mod fit_esr_nalgebra;
 mod fit_rabi_nalgebra;
+mod load;
 //mod fit_t1_nalgebra;
 
 #[pymodule]
 fn rust_lorentz(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fit, m)?)?;
     m.add_function(wrap_pyfunction!(fit_rabi, m)?)?;
+    m.add_class::<DataContainer>()?;
     Ok(())
 }
 
