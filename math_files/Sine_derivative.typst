@@ -1,0 +1,58 @@
+= Cos function and its Jacobian
+
+== Cos
+
+$ C(t, O, A, tau, phi) = O + A dot cos (pi / tau dot t + phi ) $
+
+== Cos Derivatives
+
+=== $(d C) / (d O)$
+
+$ (d C(t, O, A, tau, phi)) / (d O) &= 1 $
+
+=== $(d C) / (d A)$
+
+$ (d C(t, O, A, tau, phi)) / (d A) &= cos (pi / tau dot t + phi) $
+
+=== $(d C) / (d tau)$
+
+$ (d C(t, O, A, tau, phi)) / (d tau) &= ( d A dot cos (pi / tau dot t + phi)) / (d tau) \
+  &= A dot (-1) dot sin (pi / tau dot t + phi) dot (-1) dot pi / tau^2 dot t \
+  &= pi / tau^2 dot t dot A dot sin (pi / tau dot t + phi) \
+$
+
+=== $(d C) / (d phi)$
+
+$ (d C(t, O, A, tau, phi)) / (d phi) &= ( d A dot cos (pi / tau dot t + phi)) / (d phi) \
+  &= - A dot sin (pi / tau dot t + phi) \
+$
+
+== Residual function
+
+$ R(x, y, O, A, tau, phi) = y - C(x, O, A, tau, phi) $
+
+=== Jacobian
+
+==== $(d R) / (d O)$
+
+$ ( d R(x, y, O, A, tau, phi) ) / ( d O ) &= (d [y - C(x, O, A, tau, phi ) ] ) / (d O) \
+  &= - (d C(x, O, A, tau, phi )  ) / (d O) \
+$
+
+==== $(d R) / (d A)$
+
+$ ( d R(x, y, O, A, tau, phi) ) / ( d A ) &= (d [y - C(x, O, A, tau, phi ) ] ) / (d A) \
+  &= - (d C(x, O, A, tau, phi )  ) / (d A) \
+$
+
+==== $(d R) / (d tau)$
+
+$ ( d R(x, y, O, A, tau, phi) ) / ( d tau ) &= (d [y - C(x, O, A, tau, phi ) ] ) / (d tau) \
+  &= - (d C(x, O, A, tau, phi )  ) / (d tau) \
+$
+
+==== $(d R) / (d phi)$
+
+$ ( d R(x, y, O, A, tau, phi) ) / ( d phi ) &= (d [y - C(x, O, A, tau, phi ) ] ) / (d phi) \
+  &= - (d C(x, O, A, tau, phi )  ) / (d phi) \
+$

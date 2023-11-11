@@ -1,0 +1,98 @@
+= The Lorentzian Function and its Derivative
+
+== Lorentzian for ESR
+$ L(x, A, Gamma, x_0) = 1 - A / pi dot Gamma / ((x - x_0)^2 + Gamma^2) $
+
+== Derivatives
+
+=== $(d L)/(d A)$
+
+$ (d L(x, A, Gamma, x_0)) / (d A) &= - 1 / pi dot Gamma / ((x - x_0)^2 + Gamma^2) $
+
+=== $(d L)/(d Gamma)$
+
+$ (d L(x, A, Gamma, x_0)) / (d Gamma) &= (d ( - A / pi dot Gamma dot ((x - x_0)^2 + Gamma^2 )^(-1) )) / (d Gamma) \
+  &= - A / pi ( 1 / ((x - x_0)^2 + Gamma^2 )  -  Gamma / ((x - x_0)^2 + Gamma^2 )^2 dot 2 dot Gamma ) \
+  &= - A / pi ( ((x - x_0)^2 + Gamma^2 ) / ((x - x_0)^2 + Gamma^2 )^2  -  (2 dot Gamma^2) / ((x - x_0)^2 + Gamma^2 )^2 ) \
+  &= - A / pi  ((x - x_0)^2 - Gamma^2 ) / ((x - x_0)^2 + Gamma^2 )^2   \
+  $
+
+=== $(d L)/(d x_0)$
+
+
+$ (d L(x, A, Gamma, x_0)) / (d x_0) &= (d ( - A / pi dot Gamma dot ((x - x_0)^2 + Gamma^2 )^(-1) )) / (d Gamma) \
+  &= - A / pi  Gamma /((x - x_0)^2 + Gamma^2 )^2 dot 2 dot (x - x_0)   \
+  &= - A / pi  ( 2 dot (x - x_0) dot Gamma ) /((x - x_0)^2 + Gamma^2 )^2    \
+  $
+
+== Cost Function
+
+$ c(A, Gamma, x_0) = sum_i [y_i - L(x_i, A, Gamma, x_0)]^2 $
+
+=== Gradient Cost
+
+==== $ ( d C)/(d A) $
+
+$ (d C(A, Gamma, x_0)) / (d A) &= (d sum_i [y_i - L(x_i, A, Gamma, x_0)]^2 ) / (d A) \
+  &= (d sum_i [y_i - L(x_i, A, Gamma, x_0)]^2 ) / (d A) \
+  &= sum_i ( d [y_i - L(x_i, A, Gamma, x_0) ]^2 ) / (d A)  \
+  &= sum_i 2 dot [y_i - L(x_i, A, Gamma, x_0) ] dot ( d L(x_i, A, Gamma, x_0)) / (d A)  \
+  $
+
+Up to this point the derivative is indementend to the parameter we are taking the derivative of. Thus follows for $Gamma$ and $x_0$:
+
+
+==== $ ( d C)/(d Gamma) $
+
+$ (d C(A, Gamma, x_0)) / (d A) = sum_i 2 dot [y_i - L(x_i, A, Gamma, x_0) ] dot ( d L(x_i, A, Gamma, x_0)) / (d Gamma) $
+
+==== $ ( d C)/(d x_0) $
+
+$ (d C(A, Gamma, x_0)) / (d A) = sum_i 2 dot [y_i - L(x_i, A, Gamma, x_0) ] dot ( d L(x_i, A, Gamma, x_0)) / (d x_0) $
+
+
+== Residual Function
+
+$ R(x, y, A, Gamma, x_0) = y - L(x, A, Gamma, x_0) $
+
+=== Residual Derivatives
+
+This one is easy as almost everything drops out apart from the derivative we computed above.
+
+
+==== $ ( d R)/(d A) $
+
+$ (d R(x, y, A, Gamma, x_0)) / (d A) &= (d [ y - L(x, A, Gamma, x_0) ] ) / (d A) \
+  &= (d [-L(x, A, Gamma, x_0) ]) / (d A)
+  $
+
+==== $ ( d R)/(d Gamma) $
+
+$ (d R(x, y, A, Gamma, x_0)) / (d Gamma) &= (d [ y - L(x, A, Gamma, x_0) ] ) / (d Gamma) \
+  &= (d [-L(x, A, Gamma, x_0) ]) / (d Gamma)
+  $
+
+==== $ ( d R)/(d x_0) $
+
+$ (d R(x, y, A, Gamma, x_0)) / (d x_0) &= (d [ y - L(x, A, Gamma, x_0) ] ) / (d x_0) \
+  &= (d [-L(x, A, Gamma, x_0) ]) / (d x_0)
+  $
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

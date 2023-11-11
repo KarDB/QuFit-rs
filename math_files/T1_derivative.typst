@@ -1,0 +1,51 @@
+= T1 exponential function and its Jacobian
+
+== T1 exponential
+
+$ T_1 (t, O, A, t_1, n) = O + A dot exp (- ( t / t_1 )^n ) $
+
+== T1 Derivatives
+
+=== $(d T_1) / (d O)$
+
+$ (d T_1(t, O, A, t_1, n)) / (d O) &= 1 $
+
+=== $(d T_1) / (d A)$
+
+$ (d T_1(t, O, A, t_1, n)) / (d A) &= exp (- ( t/t_1 )^n ) $
+
+=== $(d T_1) / (d t_1)$
+
+$ (d T_1(t, O, A, t_1, n)) / (d t_1) &= A dot exp (- (t/t_1)^n) dot n dot ( t / t_1 )^(n-1) dot t  / t_1^2
+$
+
+=== $(d T_1) / (d n)$
+
+$ (d T_1(t, O, A, t_1, n)) / (d n) &= A dot exp (- (t/t_1)^n) dot (-1) dot ( t / t_1 )^n dot ln (t  / t_1) \
+  &= A dot exp (- (t/t_1)^n) dot ( t / t_1 )^n dot ln (t_1  / t)
+$
+
+== Residual function
+
+$ R(x, y, O, A, t_1) = y - T_1(x, O, A, t_1) $
+
+=== Jacobian
+
+==== $(d R) / (d O)$
+
+$ ( d R(x, y, O, A, t_1) ) / ( d O ) &= (d [y - T_1(x, O, A, t_1 ) ] ) / (d O) \
+  &= - (d T_1(x, O, A, t_1 )  ) / (d O) \
+$
+
+==== $(d R) / (d A)$
+
+$ ( d R(x, y, O, A, t_1) ) / ( d A ) &= (d [y - T_1(x, O, A, t_1 ) ] ) / (d A) \
+  &= - (d T_1(x, O, A, t_1 )  ) / (d A) \
+$
+
+==== $(d R) / (d t_1)$
+
+$ ( d R(x, y, O, A, t_1) ) / ( d t_1 ) &= (d [y - T_1(x, O, A, t_1 ) ] ) / (d t_1) \
+  &= - (d T_1(x, O, A, t_1 )  ) / (d t_1) \
+$
+

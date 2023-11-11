@@ -1,5 +1,6 @@
 use ndarray::{s, Array, ArrayD, Axis, Dimension, IxDyn, Slice};
 use ndarray_npy::read_npy;
+use numpy::IntoPyArray;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use std::cmp::min;
@@ -7,7 +8,7 @@ use std::cmp::min;
 #[derive(Debug)]
 #[pyclass]
 pub struct DataContainer {
-    pub data: Array<f32, IxDyn>,
+    pub data: Array<f64, IxDyn>,
 }
 
 #[pymethods]
@@ -58,12 +59,27 @@ impl DataContainer {
             }
         }
     }
+
+    pub fn esr_fit(&self, py: Python<'_>) -> PyResult<PyObject> {
+        let out = self.fit_esr_image();
+        Ok(out.into_pyarray(py).to_object(py))
+    }
+
+    pub fn rabi_fit(&self, py: Python<'_>) -> PyResult<PyObject> {
+        let out = self.fit_rabi_image();
+        Ok(out.into_pyarray(py).to_object(py))
+    }
+
+    pub fn get_data(&self, py: Python<'_>) -> PyResult<PyObject> {
+        let pyarray = self.data.clone().into_pyarray(py).to_object(py);
+        Ok(pyarray.into())
+    }
 }
 
 impl DataContainer {
-    fn load_data(path: String) -> Array<f32, IxDyn> {
+    fn load_data(path: String) -> Array<f64, IxDyn> {
         let data: Array<u32, IxDyn> = read_npy(path).unwrap();
-        let data = data.mapv(|x| x as f32);
+        let data = data.mapv(|x| x as f64);
         data
     }
 
@@ -83,12 +99,12 @@ impl DataContainer {
         new_shape
     }
 
-    fn blockwise_mean_2d(&self, stepsize: usize) -> ArrayD<f32> {
+    fn blockwise_mean_2d(&self, stepsize: usize) -> ArrayD<f64> {
         let shape = self.data.shape();
         let max_index_3 = shape[3];
         let max_index_4 = shape[4];
         let new_shape = self.get_new_shape(stepsize);
-        let mut result: ArrayD<f32> = Array::zeros(new_shape.as_slice());
+        let mut result: ArrayD<f64> = Array::zeros(new_shape.as_slice());
         for new_idx in result.clone().indexed_iter() {
             let idx = new_idx.0.slice();
             let idx_vec = idx.to_vec();
@@ -105,11 +121,11 @@ impl DataContainer {
         result
     }
 
-    fn blockwise_mean_1d(&self, stepsize: usize) -> ArrayD<f32> {
+    fn blockwise_mean_1d(&self, stepsize: usize) -> ArrayD<f64> {
         let shape = self.data.shape();
         let max_index_3 = shape[3];
         let new_shape = self.get_new_shape(stepsize);
-        let mut result: ArrayD<f32> = Array::zeros(new_shape.as_slice());
+        let mut result: ArrayD<f64> = Array::zeros(new_shape.as_slice());
         for new_idx in result.clone().indexed_iter() {
             let idx = new_idx.0.slice();
             let idx_vec = idx.to_vec();
