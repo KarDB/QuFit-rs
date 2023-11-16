@@ -97,7 +97,7 @@ impl RabiFit {
 }
 
 fn fit(x_data: Array1<f64>, y_data: Array1<f64>) -> Option<Array1<f64>> {
-    let y_data_tapered = (&y_data - y_data.mean().unwrap_or(1.0).clone()) * (-0.2 * &x_data + 1.0);
+    let y_data_tapered = (&y_data - y_data.mean().unwrap_or(1.0).clone()) * (-0.4 * &x_data + 1.0);
     let tau_guess = simple_argmin(&y_data_tapered.to_vec()) as f64 / y_data.len() as f64;
     let offset = y_data.mean().unwrap_or(1.0);
     let init_param = vec![offset, 0.05, tau_guess, 0.0];
@@ -123,7 +123,7 @@ fn fit(x_data: Array1<f64>, y_data: Array1<f64>) -> Option<Array1<f64>> {
 
 impl DataContainer {
     pub fn fit_rabi_image(&self) -> Array3<f64> {
-        let zdim = self.data.shape()[1];
+        let zdim = self.data.shape()[2];
         let x_axis = Array::linspace(0.0, 1.0, zdim);
         let dims: Vec<usize> = self.data.shape().iter().cloned().skip(3).collect();
         match dims.len() {
@@ -144,7 +144,7 @@ impl DataContainer {
                             None => {
                                 re.slice_mut(s![i, j, ..])
                                     .assign(&array![0.0, 0.0, 0.0, 0.0]);
-                                println!("The optmization failed! Assigning default zero values!");
+                                println!("The optmization failed at {}, {}! Assigning default zero values!", i, j);
                             }
                         }
                     }
