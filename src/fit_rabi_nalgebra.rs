@@ -144,7 +144,7 @@ impl DataContainer {
                             None => {
                                 re.slice_mut(s![i, j, ..])
                                     .assign(&array![0.0, 0.0, 0.0, 0.0]);
-                                println!("The optmization failed at {}, {}! Assigning default zero values!", i, j);
+                                // println!("The optmization failed at {}, {}! Assigning default zero values!", i, j);
                             }
                         }
                     }
