@@ -74,6 +74,11 @@ impl DataContainer {
         let pyarray = self.data.clone().into_pyarray(py).to_object(py);
         Ok(pyarray.into())
     }
+
+    pub fn fft(&self, py: Python<'_>) -> PyResult<PyObject> {
+        let pyarray = self.array_fft();
+        Ok(pyarray.into_pyarray(py).to_object(py))
+    }
 }
 
 impl DataContainer {
