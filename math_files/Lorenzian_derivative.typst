@@ -20,7 +20,7 @@ $ (d L(x, A, Gamma, x_0)) / (d Gamma) &= (d ( - A / pi dot Gamma dot ((x - x_0)^
 === $(d L)/(d x_0)$
 
 
-$ (d L(x, A, Gamma, x_0)) / (d x_0) &= (d ( - A / pi dot Gamma dot ((x - x_0)^2 + Gamma^2 )^(-1) )) / (d Gamma) \
+$ (d L(x, A, Gamma, x_0)) / (d x_0) &= (d ( - A / pi dot Gamma dot ((x - x_0)^2 + Gamma^2 )^(-1) )) / (d x_0) \
   &= - A / pi  Gamma /((x - x_0)^2 + Gamma^2 )^2 dot 2 dot (x - x_0)   \
   &= - A / pi  ( 2 dot (x - x_0) dot Gamma ) /((x - x_0)^2 + Gamma^2 )^2    \
   $

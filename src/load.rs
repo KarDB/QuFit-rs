@@ -79,6 +79,16 @@ impl DataContainer {
         let pyarray = self.array_fft();
         Ok(pyarray.into_pyarray(py).to_object(py))
     }
+
+    pub fn hilbert(&self, py: Python<'_>) -> PyResult<PyObject> {
+        let pyarray = self.array_hilbert();
+        Ok(pyarray.into_pyarray(py).to_object(py))
+    }
+
+    pub fn medfilt(&self, kernel_size: usize, py: Python<'_>) -> PyResult<PyObject> {
+        let out = self.medfilt_array(kernel_size);
+        Ok(out.into_pyarray(py).to_object(py))
+    }
 }
 
 impl DataContainer {

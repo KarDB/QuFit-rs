@@ -2,6 +2,7 @@ mod fft;
 mod fit_esr_nalgebra;
 mod fit_rabi_nalgebra;
 mod load;
+mod medfilt;
 use load::DataContainer;
 
 fn main() {

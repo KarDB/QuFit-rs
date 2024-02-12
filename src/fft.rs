@@ -1,6 +1,9 @@
 use crate::load::DataContainer;
-use ndarray::{Array4, Axis, Dim}; //Zip
+use hilbert_transform::hilbert;
+use ndarray::{s, Array1, Array4, Array5, Axis, Dim};
 use ndrustfft::{ndfft_r2c_par, Complex, R2cFftHandler};
+use rayon::prelude::*;
+use std::sync::Mutex;
 
 // When benchmarkding this reference function with criterion,
 // the below option was the fastest by large margin. Needs to
@@ -42,6 +45,40 @@ impl DataContainer {
                 vhat.to_owned()
                     .into_dimensionality::<Dim<[usize; 4]>>()
                     .expect("Could not transform fft output into correct size array")
+            }
+            _ => unimplemented!("Your input has an unsupported number of dimensions (4, 5)"),
+        }
+    }
+}
+
+impl DataContainer {
+    pub fn array_hilbert(&self) -> Array5<Complex<f64>> {
+        let dims: Vec<usize> = self.data.shape().iter().cloned().collect(); // this might be really
+                                                                            // unecessary
+        match dims.len() {
+            5 => {
+                dbg!(&dims);
+                let vhat =
+                    Array5::<Complex<f64>>::zeros((dims[0], dims[1], dims[2], dims[3], dims[4]));
+                let vhat_mutex = Mutex::new(vhat);
+                (0..dims[3]).into_par_iter().for_each(|i| {
+                    for j in 0..dims[4] {
+                        let out = hilbert(
+                            self.data
+                                .slice(s![0, 0, .., i, j])
+                                .to_owned()
+                                .as_slice()
+                                .unwrap(),
+                        );
+                        let mut vhat_unlock = vhat_mutex.lock().unwrap();
+                        vhat_unlock
+                            .slice_mut(s![0, 0, .., i, j])
+                            .assign(&Array1::<Complex<f64>>::from_vec(out));
+                    }
+                });
+
+                let vhat = vhat_mutex.into_inner().unwrap();
+                vhat
             }
             _ => unimplemented!("Your input has an unsupported number of dimensions (4, 5)"),
         }
