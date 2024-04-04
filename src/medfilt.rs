@@ -1,5 +1,5 @@
 use crate::load::DataContainer;
-use ndarray::{array, s, Array, Array2, Array3, ArrayView2, Axis};
+use ndarray::{s, Array, Array2, Array3, ArrayView2, ArrayView3, Axis};
 use rayon::prelude::*;
 
 fn medfilt2d(data: &ArrayView2<f64>, kernel_size: usize) -> Array2<f64> {
@@ -33,6 +33,25 @@ fn medfilt2d(data: &ArrayView2<f64>, kernel_size: usize) -> Array2<f64> {
     filtered
 }
 
+pub fn medfilt_rust(data: &ArrayView3<f64>, kernel_size: usize) -> Array3<f64> {
+    let zdim = data.shape()[0];
+    let xdim = data.shape()[1];
+    let ydim = data.shape()[2];
+    let mut filtered = Array::zeros((zdim, xdim, ydim));
+
+    filtered
+        .axis_iter_mut(Axis(0))
+        .into_par_iter() // Convert to a parallel iterator
+        .enumerate() // Enumerate to get indices
+        .for_each(|(i, mut subframe)| {
+            // Apply some function to each sub-array
+            let result = medfilt2d(&data.slice(s![i, .., ..]), kernel_size);
+            subframe.assign(&result);
+        });
+
+    filtered
+}
+
 impl DataContainer {
     pub fn medfilt_array(&self, kernel_size: usize) -> Array3<f64> {
         let zdim = self.data.shape()[2];
@@ -57,6 +76,7 @@ impl DataContainer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ndarray::array;
 
     #[test]
     fn test_filter() {
